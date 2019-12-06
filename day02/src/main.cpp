@@ -25,9 +25,9 @@ std::istream& operator>>(std::istream& in, comma_sep<T,sep>& t)
 
 template <typename T, typename P>
 std::vector<T> readInput(const std::string &path) {
-	std::ifstream input(path);
-	std::istream_iterator<P> start(input), end;
-	std::vector<T> data(start, end);
+	std::ifstream input{path};
+	std::istream_iterator<P> start{input}, end;
+	std::vector<T> data{start, end};
 	input.close();
 	return data;
 }
@@ -74,16 +74,46 @@ int main(int argc, char const *argv[]) {
 		return -2;
 	}
 	// holds both program and memory
-	auto data = readInput<int, comma_sep<int>>(argv[1]);
-	log() << "size: " << data.size() << std::endl;
-
-	// adjustments for data/input
-	data.at(1) = 12;
-	data.at(2) = 2;
+	auto input = readInput<int, comma_sep<int>>(argv[1]);
+	log() << "size: " << input.size() << std::endl;
 
 	int PC = 0;
-	while (data.at(PC) != 99) {
-		PC += execute(data, PC);
+
+	// Part1
+	log() << "==============================================\n"
+		<< "Execute input";
+	{
+		std::vector<int> data{input.begin(), input.end()};
+		// adjustments for data/input
+		data.at(1) = 12;
+		data.at(2) = 2;
+
+		while (data.at(PC) != 99) {
+			PC += execute(data, PC);
+		}
+		log() << "data[0]:" << data.at(0) << std::endl;
 	}
-	log() << "data[0]:" << data.at(0) << std::endl;
+	// Part2
+	log() << "==============================================\n"
+		 << "Finding correct input to get specific output\n";
+	{
+		PC = 0;
+		int answer = 0;
+		for(; answer < 9999; answer++) {
+			std::vector<int> simulationData{input.begin(), input.end()};
+			simulationData.at(1) = answer / 100;
+			simulationData.at(2) = answer % 100;
+
+			while(simulationData.at(PC) != 99) {
+				int progress = execute(simulationData, PC);
+				if (progress < 0) break;
+				PC += progress;
+			}
+			PC = 0;
+			if (simulationData.at(0) == 19690720) {
+				log() << "Found solution: answer=" << answer << std::endl;
+				answer = 9999;
+			}
+		}
+	}
 }
