@@ -1,9 +1,15 @@
 #include <cstdio>
 #include <fstream>
-#include <iostream>
 #include <iterator>
 #include <vector>
 #include <sstream>
+#include <utility>
+#include <set>
+#include <iostream>
+#include <algorithm>
+
+#include "blackMagicIterator.hpp"
+#include "common_types.hpp"
 
 // comma seperated template code from: https://stackoverflow.com/a/21838123
 template<class T, char sep=','>
@@ -25,27 +31,22 @@ std::istream& operator>>(std::istream& in, comma_sep<T,sep>& t)
 
 template<typename T>
 std::ostream& operator<<(std::ostream& out, const std::vector<T> t) {
-	out << "[" << t.size() << "|";
+	out << "[" << t.size() << "| ";
 	std::copy(t.cbegin(), t.cend(), std::ostream_iterator<T>(out, ","));
-	out << "\b]";
+	out << (t.size() > 0 ? "\b]" : "]");
 	return out;
 }
 
-struct Direction {
-	char c;
-};
-
-struct WireToken {
-	struct Direction dir;
-	int length;
-};
-
-std::ostream& operator<<(std::ostream& out, const Direction& t) {
-	return out << t.c;
+template<typename T>
+std::ostream& operator<<(std::ostream& out, const std::set<T> t) {
+	out << "[" << t.size() << "| ";
+	std::copy(t.cbegin(), t.cend(), std::ostream_iterator<T>(out, ","));
+	out << (t.size() > 0 ? "\b]" : "]");
+	return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const WireToken& t) {
-	return out << "(" << t.dir << "," << t.length << ")";
+std::ostream& operator<<(std::ostream& out, const BlackMagicIterator& t) {
+	return t.operator<<(out);
 }
 
 std::istream& operator>>(std::istream& in, Direction& t) {
@@ -83,6 +84,11 @@ std::vector<T> readInput(const std::string &path) {
 	return data;
 }
 
+std::set<Coordinate> explodeIntoPoints(std::vector<WireToken> &vec) {
+	BlackMagicIterator begin(vec.cbegin(), vec.cend()), end;
+	return std::set<Coordinate>(begin, end);
+}
+
 auto& log() {
 	return std::cout;
 }
@@ -95,13 +101,35 @@ int main(int argc, char const *argv[]) {
 	// read lines of file
 	// per line create a vector of { orientation, distance } (rad coords)
 	auto data = readInput<std::vector<WireToken>, WireToken>(argv[1]);
-	log() << "size: " << data.size() << "\n";
-	for(auto&& wire : data) {
-		log() << wire << "\n";
-	}
+	log() << "Wires found: " << data.size() << "\n";
+
+	auto wire1 = data.at(0);
+	auto wire2 = data.at(1);
+
+	auto wire1Coordinates = explodeIntoPoints(wire1);
+	auto wire2Coordinates = explodeIntoPoints(wire2);
+
 	// build set of equidistant points for each wire (points on a grid)
 	// find intersection points
+	std::set<Coordinate> crossOvers;
+	std::set_intersection(wire1Coordinates.cbegin(), wire1Coordinates.cend(),
+						wire2Coordinates.cbegin(), wire2Coordinates.cend(),
+						std::inserter(crossOvers, crossOvers.begin()));
+
+	log() << "crossOvers size: " << crossOvers.size() << std::endl;
+	log() << crossOvers << std::endl;
+
+	auto manhattanLambda = [](const Coordinate& t) -> int {
+		return std::abs(t.x) + std::abs(t.y);
+	};
+	std::set<int> manhattanDistances;
+
+	std::transform(crossOvers.cbegin(), crossOvers.cend(),
+		std::inserter(manhattanDistances, manhattanDistances.begin()),
+		manhattanLambda);
+
 	// find min with respect to manhattan distance to origin point
+	log() << "Solution: " << *(++std::min_element(manhattanDistances.begin(), manhattanDistances.end())) << std::endl;
 	// ???
-	// Bacon & Profit.tTtzW
+	// Bacon & Profit
 }
