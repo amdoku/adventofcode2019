@@ -84,9 +84,9 @@ std::vector<T> readInput(const std::string &path) {
 	return data;
 }
 
-std::set<Coordinate> explodeIntoPoints(std::vector<WireToken> &vec) {
+std::set<PuzzleCount> explodeIntoPoints(std::vector<WireToken> &vec) {
 	BlackMagicIterator begin(vec.cbegin(), vec.cend()), end;
-	return std::set<Coordinate>(begin, end);
+	return std::set<PuzzleCount>(begin, end);
 }
 
 auto& log() {
@@ -111,7 +111,10 @@ int main(int argc, char const *argv[]) {
 
 	// build set of equidistant points for each wire (points on a grid)
 	// find intersection points
-	std::set<Coordinate> crossOvers;
+
+	// FIXME rewrite this so the step count needed to reach the point is
+	// oreserved in struct PuzzleCount
+	std::set<PuzzleCount> crossOvers;
 	std::set_intersection(wire1Coordinates.cbegin(), wire1Coordinates.cend(),
 						wire2Coordinates.cbegin(), wire2Coordinates.cend(),
 						std::inserter(crossOvers, crossOvers.begin()));
@@ -119,17 +122,20 @@ int main(int argc, char const *argv[]) {
 	log() << "crossOvers size: " << crossOvers.size() << std::endl;
 	log() << crossOvers << std::endl;
 
-	auto manhattanLambda = [](const Coordinate& t) -> int {
-		return std::abs(t.x) + std::abs(t.y);
+	auto manhattanLambda = [](const PuzzleCount& t) -> auto {
+		return std::make_pair(std::abs(t.c.x) + std::abs(t.c.y), t.step);
 	};
-	std::set<int> manhattanDistances;
+	std::set<std::pair<int, int>> manhattanDistances;
 
 	std::transform(crossOvers.cbegin(), crossOvers.cend(),
 		std::inserter(manhattanDistances, manhattanDistances.begin()),
 		manhattanLambda);
 
+	auto solution = *(++std::min_element(manhattanDistances.begin(), manhattanDistances.end()));
+
 	// find min with respect to manhattan distance to origin point
-	log() << "Solution: " << *(++std::min_element(manhattanDistances.begin(), manhattanDistances.end())) << std::endl;
+	log() << "Solution part1: " << solution.first
+			<< "\nSolution part2: " << solution.second << std::endl;
 	// ???
 	// Bacon & Profit
 }

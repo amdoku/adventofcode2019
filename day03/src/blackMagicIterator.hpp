@@ -17,8 +17,8 @@
  * 		that would be int)
  */
 
-class BlackMagicIterator : public std::iterator<std::forward_iterator_tag, Coordinate, std::ptrdiff_t, const Coordinate*, const Coordinate&> {
-	using base = std::iterator<std::forward_iterator_tag, Coordinate, std::ptrdiff_t, const Coordinate*, const Coordinate&>;
+class BlackMagicIterator : public std::iterator<std::forward_iterator_tag, PuzzleCount, std::ptrdiff_t, const PuzzleCount*, const PuzzleCount&> {
+	using base = std::iterator<std::forward_iterator_tag, Coordinate, std::ptrdiff_t, const PuzzleCount*, const PuzzleCount&>;
 	using self = BlackMagicIterator;
 	using parent_iterator = decltype(std::vector<WireToken>())::const_iterator;
 public:
@@ -89,7 +89,7 @@ public:
 	}
 
 private:
-	Coordinate currentVal{0,0};
+	PuzzleCount currentVal{0,0,0};
 	CoordinateDelta direction{0,0};
 	parent_iterator baseStart;
 	parent_iterator baseEnd;
