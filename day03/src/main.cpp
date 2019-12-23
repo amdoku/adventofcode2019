@@ -7,6 +7,7 @@
 #include <set>
 #include <iostream>
 #include <algorithm>
+#include <iterator>
 
 #include "blackMagicGenerator.hpp"
 #include "common_types.hpp"
@@ -110,32 +111,46 @@ int main(int argc, char const *argv[]) {
 	auto wire2Coordinates = explodeIntoPoints(wire2);
 
 	// build set of equidistant points for each wire (points on a grid)
-	// find intersection points
+	// find intersectio points
+	std::vector<std::pair<PuzzleCount, PuzzleCount>> crossOvers;
+	auto intersectionLambda = [&crossOvers, &wire2Coordinates](auto&& t) -> void {
+		if (t.c.x == 0 && t.c.y == 0) return; // remove origin
 
-	// FIXME rewrite this so the step count needed to reach the point is
-	// oreserved in struct PuzzleCount
-	std::set<PuzzleCount> crossOvers;
-	std::set_intersection(wire1Coordinates.cbegin(), wire1Coordinates.cend(),
-						wire2Coordinates.cbegin(), wire2Coordinates.cend(),
-						std::inserter(crossOvers, crossOvers.begin()));
+		auto crossOver = wire2Coordinates.find(t);
+		if (crossOver != wire2Coordinates.end()) {
+			crossOvers.push_back(std::make_pair(t, *crossOver));
+		}
+	};
+	std::for_each(wire1Coordinates.cbegin(), wire1Coordinates.cend(), intersectionLambda);
 
 	log() << "crossOvers size: " << crossOvers.size() << std::endl;
 	log() << crossOvers << std::endl;
 
-	auto manhattanLambda = [](const PuzzleCount& t) -> auto {
-		return std::make_pair(std::abs(t.c.x) + std::abs(t.c.y), t.step);
+	// calculate manhattan distances
+	auto manhattanLambda = [](const std::pair<PuzzleCount, PuzzleCount>& t) -> auto {
+		return std::abs(t.first.c.x) + std::abs(t.first.c.y);
 	};
-	std::set<std::pair<int, int>> manhattanDistances;
-
+	std::set<int> manhattanDistances;
 	std::transform(crossOvers.cbegin(), crossOvers.cend(),
 		std::inserter(manhattanDistances, manhattanDistances.begin()),
 		manhattanLambda);
 
-	auto solution = *(++std::min_element(manhattanDistances.begin(), manhattanDistances.end()));
+	// calculate the other distance
+	auto otherDistanceLambda = [](const std::pair<PuzzleCount, PuzzleCount>& t) -> int {
+		return t.first.step + t.second.step;
+	};
+	std::set<int> otherDistances;
+	std::transform(crossOvers.cbegin(), crossOvers.cend(),
+		std::inserter(otherDistances, otherDistances.begin()),
+		otherDistanceLambda);
+
+
+	auto solution = *std::min_element(manhattanDistances.begin(), manhattanDistances.end());
+	auto solution2 = *std::min_element(otherDistances.begin(), otherDistances.end());
 
 	// find min with respect to manhattan distance to origin point
-	log() << "Solution part1: " << solution.first
-			<< "\nSolution part2: " << solution.second << std::endl;
+	log() << "Solution part1: " << solution
+			<< "\nSolution part2: " << solution2 << std::endl;
 	// ???
 	// Bacon & Profit
 }

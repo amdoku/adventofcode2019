@@ -64,6 +64,10 @@ std::ostream& operator<<(std::ostream& out, const PuzzleCount& t) {
 	return out << t.c << "@" << t.step;
 }
 
+std::ostream& operator<<(std::ostream& out, const std::pair<PuzzleCount, PuzzleCount>& t) {
+	return out << "[" << t.first << " | " << t.second << "]";
+}
+
 Coordinate operator+(const Coordinate& lhs, const CoordinateDelta& rhs) {
 	return { lhs.x + rhs.dX, lhs.y + rhs.dY };
 }
