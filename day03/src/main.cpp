@@ -8,7 +8,7 @@
 #include <iostream>
 #include <algorithm>
 
-#include "blackMagicIterator.hpp"
+#include "blackMagicGenerator.hpp"
 #include "common_types.hpp"
 
 // comma seperated template code from: https://stackoverflow.com/a/21838123
@@ -45,7 +45,7 @@ std::ostream& operator<<(std::ostream& out, const std::set<T> t) {
 	return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const BlackMagicIterator& t) {
+std::ostream& operator<<(std::ostream& out, const BlackMagicGenerator& t) {
 	return t.operator<<(out);
 }
 
@@ -85,7 +85,7 @@ std::vector<T> readInput(const std::string &path) {
 }
 
 std::set<PuzzleCount> explodeIntoPoints(std::vector<WireToken> &vec) {
-	BlackMagicIterator begin(vec.cbegin(), vec.cend()), end;
+	BlackMagicGenerator begin(vec.cbegin(), vec.cend()), end;
 	return std::set<PuzzleCount>(begin, end);
 }
 

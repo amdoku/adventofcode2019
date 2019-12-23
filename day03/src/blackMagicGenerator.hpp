@@ -9,7 +9,7 @@
 #include "common_types.hpp"
 
 /*
- * This iterator takes a single element and derives multiple values from it.
+ * This generator takes a single element and derives multiple values from it.
  *
  * parent_iterator	The type of iterator used to access the base elements
  *					(i.e. vector<int>::const_iterator)
@@ -17,13 +17,13 @@
  * 		that would be int)
  */
 
-class BlackMagicIterator : public std::iterator<std::forward_iterator_tag, PuzzleCount, std::ptrdiff_t, const PuzzleCount*, const PuzzleCount&> {
+class BlackMagicGenerator : public std::iterator<std::forward_iterator_tag, PuzzleCount, std::ptrdiff_t, const PuzzleCount*, const PuzzleCount&> {
 	using base = std::iterator<std::forward_iterator_tag, Coordinate, std::ptrdiff_t, const PuzzleCount*, const PuzzleCount&>;
-	using self = BlackMagicIterator;
+	using self = BlackMagicGenerator;
 	using parent_iterator = decltype(std::vector<WireToken>())::const_iterator;
 public:
-	BlackMagicIterator() : baseStart(), baseEnd(), iteration(std::numeric_limits<decltype(iteration)>::max()) { };
-	BlackMagicIterator(parent_iterator start, parent_iterator end)
+	BlackMagicGenerator() : baseStart(), baseEnd(), iteration(std::numeric_limits<decltype(iteration)>::max()) { };
+	BlackMagicGenerator(parent_iterator start, parent_iterator end)
 		: baseStart(start), baseEnd(end) {
 			updateDirection();
 		};
@@ -56,7 +56,7 @@ public:
 		return currentVal;
 	}
 
-	friend bool operator>(const BlackMagicIterator& lhs, const BlackMagicIterator& rhs) {
+	friend bool operator>(const BlackMagicGenerator& lhs, const BlackMagicGenerator& rhs) {
 		if (lhs.iteration == std::numeric_limits<decltype(lhs.iteration)>::max()
 			&& rhs.iteration == std::numeric_limits<decltype(rhs.iteration)>::max()) return false;
 		if (lhs.baseStart < rhs.baseStart) return true;
@@ -64,19 +64,19 @@ public:
 		return lhs.iteration > rhs.iteration;
 	}
 
-	friend bool operator<(const BlackMagicIterator& lhs, const BlackMagicIterator& rhs) {
+	friend bool operator<(const BlackMagicGenerator& lhs, const BlackMagicGenerator& rhs) {
 		if (lhs.iteration == std::numeric_limits<decltype(lhs.iteration)>::max()
 			&& rhs.iteration == std::numeric_limits<decltype(rhs.iteration)>::max()) return false;
 		return !(lhs > rhs) && lhs != rhs;
 	}
 
-	friend bool operator==(const BlackMagicIterator& lhs, const BlackMagicIterator& rhs) {
+	friend bool operator==(const BlackMagicGenerator& lhs, const BlackMagicGenerator& rhs) {
 		if (lhs.iteration == std::numeric_limits<decltype(lhs.iteration)>::max()
 			&& rhs.iteration == std::numeric_limits<decltype(rhs.iteration)>::max()) return true;
 		return lhs.baseStart == rhs.baseStart && lhs.iteration == rhs.iteration;
 	}
 
-	friend bool operator!=(const BlackMagicIterator& lhs, const BlackMagicIterator& rhs) {
+	friend bool operator!=(const BlackMagicGenerator& lhs, const BlackMagicGenerator& rhs) {
 		return !(lhs == rhs);
 	}
 
